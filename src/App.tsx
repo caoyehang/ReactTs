@@ -1,5 +1,5 @@
 import "./App.css";
-import Login from "./view/Login/index";
+import Login from "./views/login/index";
 const App = () => {
   return (
     <div>
