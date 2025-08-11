@@ -1,17 +1,39 @@
+// 定义项目中其他文件的ts编译规则
 {
   "compilerOptions": {
+    // 一个 TypeScript 选项，用于指定一个 .tsbuildinfo 文件的路径，这个文件保存了增量编译的缓存信息。
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
-    "target": "ES2022",
+    // 用于指定编译后的 JavaScript 代码的目标 ECMAScript 版本。
+    // "ES2020": 支持 ECMAScript 2020 的新特性，例如大数字支持、Promise.allSettled 等。
+    "target": "ES2020",
+    //当启用 useDefineForClassFields 选项时，TypeScript 会使用 ECMAScript 2022 引入的现代字段定义方式，
+    // 即使用 Object.defineProperty 来定义类字段，而不是传统的 this.fieldName = value 方式。这使得 TypeScript 编译的 JavaScript 代码更加符合 ECMAScript 的新标准。
     "useDefineForClassFields": true,
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    // 一个配置选项，用于指定项目中需要包含的库文件集合。这些库文件定义了各种 JavaScript 内置对象
+    //和 Web API，例如数组、字符串、DOM 元素等。通过配置 lib 选项，开发者可以明确指定要使用的 JavaScript 和浏览器环境特性。
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    //指定了 TypeScript 编译器使用最先进的 ES 模块系统（即 ECMAScript Next 模块），这意味着它会根据最新的 ECMAScript 标准生成模块化的代码。
     "module": "ESNext",
+    //指示 TypeScript 编译器跳过对库文件（node_modules 中的类型定义文件）的类型检查。
+    //这一选项在一些特定场景下可以提高编译速度，尤其是在大型项目中使用大量外部库时。
     "skipLibCheck": true,
-
+    //"paths" 是一种用于定义模块解析别名的选项。你提供的配置
+    "paths": {
+      "@/*":["./src/*"]
+    },
+    
     /* Bundler mode */
+    //用于指定模块解析策略。当设置为 "bundler" 时，TypeScript 会使用类似于 Webpack 的模块解析策略。
     "moduleResolution": "bundler",
+    // 用于指定是否允许导入 TypeScript 文件扩展名。当设置为 true 时，TypeScript 允许导入以 .ts 或 .tsx 结尾的文件。
     "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
+    // 是一个非常有用的选项，特别是在与现代构建工具（如 Webpack、Vite）或者与一些代码分割和热重载功能一起使用时。
+    // 这个选项确保 TypeScript 在编译过程中遵循模块的独立性原则，每个文件都被当作一个独立的模块处理。
+    "isolatedModules": true,
+    // 它控制 TypeScript 如何推断和处理模块系统的行为，特别是针对不同的文件类型和扩展名。
+    // 当你将 moduleDetection 设置为 "force" 时，TypeScript 会强制将所有 .ts 和 .tsx 文件视为模块，而不管它们是否包含 import 或 export 语句。
     "moduleDetection": "force",
+    // 用于控制 TypeScript 编译器的行为。具体来说，这个选项的作用是告诉编译器不生成任何输出文件，即不会将 TypeScript 文件编译成 JavaScript 文件或声明文件。
     "noEmit": true,
     "jsx": "react-jsx",
 
@@ -19,7 +41,6 @@
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
