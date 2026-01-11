@@ -1,5 +1,5 @@
 const index = () => {
-  return <div>Home</div>;
+  return <div className="text-red-500 text-xl font-bold">Home</div>;
 };
 
 export default index;

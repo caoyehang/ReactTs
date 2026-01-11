@@ -1,11 +1,14 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     // 核心插件
     react(),
+    // tailwindcss插件
+    tailwindcss(), // ⭐ 关键
   ],
   // 本地服务配置
   server: {
