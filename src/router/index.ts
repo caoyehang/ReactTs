@@ -3,6 +3,11 @@ import { lazy } from "react";
 const Router: IRouterType.IRouter[] = [
   {
     path: "/",
+    element: lazy(() => import("@/pages/layout/index")),
+    meta: { title: "layout" },
+  },
+  {
+    path: "/home",
     element: lazy(() => import("@/pages/home/index")),
     meta: { title: "首页" },
   },
