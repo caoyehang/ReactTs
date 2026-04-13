@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import router from "./router/index";
 const App = () => {
   // 由于路由组件是懒加载的，渲染页面可能会有延迟，使用Suspense 可优化交互
+  // 包装器：接收路由对象，将其中的 element（懒加载组件）用 Suspense 包裹，确保异步加载时不白屏。
   const RouteEleMent = (route: IRouterType.IRouter): React.ReactNode => {
     if (!route.element) {
       return null;
@@ -17,6 +18,7 @@ const App = () => {
     );
   };
   // 通过每个路由对象渲染Route
+  // 递归处理嵌套路由
   const RouteItem = (route: IRouterType.IRouter) => {
     return (
       <Route key={route.path} element={RouteEleMent(route)} path={route.path}>

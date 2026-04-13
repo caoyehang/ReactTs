@@ -1,15 +1,11 @@
 import { lazy } from "react";
-
+import modules from "./modules/index";
 const Router: IRouterType.IRouter[] = [
   {
     path: "/",
     element: lazy(() => import("@/pages/Layout/index")),
     meta: { title: "layout" },
-  },
-  {
-    path: "/home",
-    element: lazy(() => import("@/pages/home/index")),
-    meta: { title: "首页" },
+    children: [...modules],
   },
   {
     path: "/login",
