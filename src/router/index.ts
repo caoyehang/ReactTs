@@ -3,7 +3,7 @@ import modules from "./modules/index";
 const Router: IRouterType.IRouter[] = [
   {
     path: "/",
-    element: lazy(() => import("@/pages/Layout/index")),
+    element: lazy(() => import("@/Layout/index")),
     meta: { title: "layout" },
     children: [...modules],
   },
