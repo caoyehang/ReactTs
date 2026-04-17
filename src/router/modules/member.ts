@@ -2,11 +2,13 @@ import { lazy } from "react";
 
 const routes: IRouterType.IRouter[] = [
   {
+    id: "member",
     path: "/member",
     name: "member",
     meta: { title: "member", icon: "ant-design:team-outlined" },
     children: [
       {
+        id: "member-group",
         path: "group",
         name: `member-group`,
         meta: {
@@ -16,6 +18,7 @@ const routes: IRouterType.IRouter[] = [
         element: lazy(() => import("@/pages/member/group/index")),
       },
       {
+        id: "member-info",
         path: "info",
         name: `member-info`,
         meta: {
