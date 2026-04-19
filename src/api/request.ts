@@ -1,40 +1,93 @@
 import { message } from "antd";
-import axios, { AxiosError, type AxiosRequestConfig, type Method } from "axios";
+import axios, {
+  AxiosError,
+  type AxiosInstance,
+  type AxiosRequestConfig,
+  type AxiosResponse,
+  type InternalAxiosRequestConfig,
+  type Method,
+} from "axios";
 
-// 默认请求超时时间（毫秒）。
+// 请求基础配置：统一超时、token 存储键和环境变量中的 API 地址。
 const DEFAULT_TIMEOUT = 10_000;
-// query 参数支持的基础类型。
+const TOKEN_STORAGE_KEY = "access_token";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.trim() ?? "";
+
 type Primitive = string | number | boolean | null | undefined;
-// 单个 query 字段可为单值或数组。
 type QueryValue = Primitive | Primitive[];
-// query 参数对象类型。
+
 export type QueryParams = Record<string, QueryValue>;
 
-// 统一请求入参：对 axios 配置做语义化封装（query/body）。
-export interface RequestConfig extends Omit<AxiosRequestConfig, "params" | "data" | "url" | "method"> {
-  // HTTP 方法，默认 GET。
+// 对外暴露的请求配置：在 axios 原生配置上补充 query/body 等语义化字段。
+export interface RequestConfig extends Omit<
+  AxiosRequestConfig,
+  "params" | "data" | "url" | "method"
+> {
   method?: Method;
-  // 可按请求覆盖 baseURL（不传则使用实例默认值）。
   baseURL?: string;
-  // URL 查询参数（会映射到 axios params）。
   query?: QueryParams;
-  // 请求体（会映射到 axios data）。
   body?: unknown;
+  silentError?: boolean;
+  withToken?: boolean;
 }
 
-// 创建 axios 实例：baseURL 来自 env，便于区分 dev/test/prod 环境。
-const axiosInstance = axios.create({
-  // Vite 环境变量读取（如 .env.development 中的 VITE_API_BASE_URL）。
-  baseURL: import.meta.env.VITE_API_BASE_URL ?? "",
-  // 全局默认超时。
-  timeout: DEFAULT_TIMEOUT,
-});
+// 运行时配置：用于把自定义字段安全传递到 axios 请求链路中。
+interface RequestRuntimeConfig<D = unknown> extends AxiosRequestConfig<D> {
+  silentError?: boolean;
+  withToken?: boolean;
+}
 
-// 控制并发请求出错时只展示一个错误弹窗。
+// 拦截器内部读取的配置类型，和 RequestRuntimeConfig 保持一致。
+interface InternalRequestRuntimeConfig<
+  D = unknown,
+> extends InternalAxiosRequestConfig<D> {
+  silentError?: boolean;
+  withToken?: boolean;
+}
+
+let memoryToken = "";
 let isMessageVisible = false;
 
+// 优先读取内存中的 token，避免每次请求都访问 localStorage。
+function getStoredToken() {
+  if (memoryToken) {
+    return memoryToken;
+  }
+
+  if (typeof window === "undefined") {
+    return "";
+  }
+
+  return window.localStorage.getItem(TOKEN_STORAGE_KEY) ?? "";
+}
+
+// 登录后写入 token，同时同步到 localStorage，便于刷新后恢复。
+export function setAccessToken(token: string) {
+  memoryToken = token.trim();
+
+  if (typeof window !== "undefined") {
+    if (memoryToken) {
+      window.localStorage.setItem(TOKEN_STORAGE_KEY, memoryToken);
+    } else {
+      window.localStorage.removeItem(TOKEN_STORAGE_KEY);
+    }
+  }
+}
+
+export function clearAccessToken() {
+  setAccessToken("");
+}
+
+export function getAccessToken() {
+  return getStoredToken();
+}
+
+// 并发报错时只弹一个消息，避免连续请求失败造成提示轰炸。
 function showErrorMessageOnce(content: string) {
-  if (isMessageVisible) return;
+  if (isMessageVisible) {
+    return;
+  }
+
   isMessageVisible = true;
   message.error({
     content,
@@ -45,41 +98,160 @@ function showErrorMessageOnce(content: string) {
   });
 }
 
-// 请求拦截器：预留 token、签名、租户信息等统一注入点。
-axiosInstance.interceptors.request.use((config) => {
-  // 后续可在这里注入 token、租户信息、traceId 等。
-  return config;
+// 过滤掉值为 undefined 的查询参数，避免生成多余的 query string。
+function normalizeQuery(query?: QueryParams) {
+  if (!query) {
+    return undefined;
+  }
+
+  return Object.fromEntries(
+    Object.entries(query).filter(([, value]) => value !== undefined),
+  );
+}
+
+// 统一提取后端或网络层错误信息，供响应拦截器和请求兜底复用。
+function getErrorMessage(error: unknown) {
+  const axiosError = error as AxiosError<{ message?: string; msg?: string }>;
+
+  return (
+    axiosError.response?.data?.message ??
+    axiosError.response?.data?.msg ??
+    axiosError.message ??
+    "请求失败，请稍后重试"
+  );
+}
+
+// 请求拦截器：默认自动挂载 Bearer Token，也支持按请求关闭。
+function handleRequestConfig(config: InternalAxiosRequestConfig) {
+  const runtimeConfig = config as InternalRequestRuntimeConfig;
+  const token = getStoredToken();
+
+  if (token && runtimeConfig.withToken !== false) {
+    runtimeConfig.headers.Authorization ??= `Bearer ${token}`;
+  }
+
+  return runtimeConfig;
+}
+
+// 响应错误统一处理，支持 silentError 静默关闭全局提示。
+function handleResponseError(error: unknown) {
+  const config = (error as AxiosError).config as
+    | InternalRequestRuntimeConfig
+    | undefined;
+
+  if (!config?.silentError) {
+    showErrorMessageOnce(getErrorMessage(error));
+  }
+
+  return Promise.reject(error);
+}
+
+// 项目统一 axios 实例：所有接口请求都应优先基于该实例发起。
+export const httpClient: AxiosInstance = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: DEFAULT_TIMEOUT,
+  headers: {
+    "Content-Type": "application/json;charset=UTF-8",
+  },
 });
 
-// 对外统一请求函数：兼容 request<T>(url, { method, query, body }) 调用方式。
-export async function request<T>(url: string, config: RequestConfig = {}): Promise<T | null> {
-  try {
-    // 发起请求并把语义化字段映射到 axios 字段。
-    const response = await axiosInstance.request<T>({
-      // 请求路径。
-      url,
-      // 请求方法（默认 GET）。
-      method: config.method ?? "GET",
-      // 单次覆盖 baseURL。
-      baseURL: config.baseURL,
-      // query -> params。
-      params: config.query,
-      // body -> data。
-      data: config.body,
-      // 合并其余 axios 配置（headers/timeout/signal 等）。
-      ...config,
-    });
+httpClient.interceptors.request.use(handleRequestConfig, handleResponseError);
+httpClient.interceptors.response.use(
+  (response) => response,
+  handleResponseError,
+);
 
-    // 不处理后端业务码，直接返回响应体。
+// 通用请求入口：兼容常规 axios 配置，同时统一 query/body 的调用习惯。
+export async function request<T>(
+  url: string,
+  config: RequestConfig = {},
+): Promise<T | null> {
+  const {
+    method = "GET",
+    query,
+    body,
+    silentError,
+    withToken,
+    ...axiosConfig
+  } = config;
+
+  const requestConfig: RequestRuntimeConfig = {
+    url,
+    method,
+    params: normalizeQuery(query),
+    data: body,
+    silentError,
+    withToken,
+    ...axiosConfig,
+  };
+
+  try {
+    const response: AxiosResponse<T> = await httpClient.request<
+      T,
+      AxiosResponse<T>
+    >(requestConfig);
+
     return response.data;
-  } catch (error) {
-    const axiosErr = error as AxiosError<{ message?: string }>;
-    const errMsg =
-      axiosErr.response?.data?.message ??
-      axiosErr.message ??
-      "请求失败，请稍后重试";
-    showErrorMessageOnce(errMsg);
+  } catch {
     return null;
   }
 }
 
+// 便捷方法：覆盖常见 HTTP 动词，减少业务层重复传 method。
+export function get<T>(
+  url: string,
+  config?: Omit<RequestConfig, "method" | "body">,
+) {
+  return request<T>(url, {
+    ...config,
+    method: "GET",
+  });
+}
+
+export function post<T, D = unknown>(
+  url: string,
+  body?: D,
+  config?: Omit<RequestConfig, "method" | "body">,
+) {
+  return request<T>(url, {
+    ...config,
+    method: "POST",
+    body,
+  });
+}
+
+export function put<T, D = unknown>(
+  url: string,
+  body?: D,
+  config?: Omit<RequestConfig, "method" | "body">,
+) {
+  return request<T>(url, {
+    ...config,
+    method: "PUT",
+    body,
+  });
+}
+
+export function patch<T, D = unknown>(
+  url: string,
+  body?: D,
+  config?: Omit<RequestConfig, "method" | "body">,
+) {
+  return request<T>(url, {
+    ...config,
+    method: "PATCH",
+    body,
+  });
+}
+
+export function del<T>(
+  url: string,
+  config?: Omit<RequestConfig, "method" | "body">,
+) {
+  return request<T>(url, {
+    ...config,
+    method: "DELETE",
+  });
+}
+
+export default httpClient;
