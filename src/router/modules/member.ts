@@ -1,5 +1,3 @@
-import { lazy } from "react";
-
 const routes: IRouterType.IRouter[] = [
   {
     id: "member",
@@ -15,7 +13,7 @@ const routes: IRouterType.IRouter[] = [
           title: "memberGroup",
           keepAlive: true,
         },
-        element: lazy(() => import("@/pages/member/group/index")),
+        component: () => import("@/pages/member/group/index"),
       },
       {
         id: "member-info",
@@ -25,7 +23,7 @@ const routes: IRouterType.IRouter[] = [
           title: "memberInfo",
           keepAlive: true,
         },
-        element: lazy(() => import("@/pages/member/info/index")),
+        component: () => import("@/pages/member/info/index"),
       },
     ],
   },

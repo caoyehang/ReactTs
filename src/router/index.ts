@@ -1,16 +1,66 @@
-import staticRouteConfig from "./config";
-import { buildRouteObjects } from "./buildRouteObjects";
-import { createAppRouter } from "./createAppRouter";
+import { Suspense, createElement, lazy } from "react";
+import type { RouteObject } from "react-router-dom";
+import { Navigate, createBrowserRouter } from "react-router-dom";
+import moduleRoutes from "./modules";
 
-// 1) 业务配置 -> RouteObject（适配 React Router v7 Data Router）。
-export const routeObjects = buildRouteObjects(staticRouteConfig);
+const routeLoading = createElement("div", { className: "loading-spinner" });
 
-// 2) RouteObject -> 浏览器路由实例（供 RouterProvider 使用）。
-export const appRouter = createAppRouter(routeObjects);
+function renderLazyRoute(importer: IRouterType.RouteComponentImporter) {
+  const Component = lazy(importer);
 
-// 对外暴露基础能力，方便在权限初始化阶段扩展动态路由。
-export { staticRouteConfig, buildRouteObjects, createAppRouter };
-export { mergeRoutesUnderId } from "./dynamic/mergeRoutes";
+  return createElement(
+    Suspense,
+    { fallback: routeLoading },
+    createElement(Component),
+  );
+}
 
-// 兼容旧用法：仍可直接拿到静态路由配置。
-export default staticRouteConfig;
+const routes: IRouterType.IRouter[] = [
+  {
+    id: "layout",
+    path: "/",
+    meta: { title: "layout" },
+    component: () => import("@/Layout/index"),
+    children: [
+      {
+        index: true,
+        element: createElement(Navigate, { to: "/home", replace: true }),
+      },
+      {
+        id: "home",
+        path: "/home",
+        meta: { title: "首页" },
+        component: () => import("@/pages/home/index"),
+      },
+      ...moduleRoutes,
+    ],
+  },
+  {
+    id: "login",
+    path: "/login",
+    meta: { title: "登录" },
+    component: () => import("@/pages/login/index"),
+  },
+  {
+    id: "not-found",
+    path: "*",
+    meta: { title: "404" },
+    component: () => import("@/pages/notFound/index"),
+  },
+];
+
+function normalizeRoutes(routes: IRouterType.IRouter[]): RouteObject[] {
+  return routes.map(
+    ({ children, component, meta, name, handle, element, ...route }) => ({
+      ...route,
+      element: element ?? (component ? renderLazyRoute(component) : undefined),
+      handle: handle ?? { meta, name },
+      children: children?.length ? normalizeRoutes(children) : undefined,
+    }),
+  );
+}
+
+export const appRoutes: RouteObject[] = normalizeRoutes(routes);
+export const appRouter = createBrowserRouter(appRoutes);
+
+export default appRouter;

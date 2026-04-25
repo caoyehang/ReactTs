@@ -1,16 +1,26 @@
 declare namespace IRouterType {
+  type RouteComponentImporter = () => Promise<{ default: () => JSX.Element }>;
+
   interface IMeta {
     title: string;
     icon?: string;
     keepAlive?: boolean;
   }
-  interface IRouter {
-    /** 与 `RouteObject.id` 对齐，便于合并动态子路由、调试与权限绑定 */
-    id?: string;
-    path: string;
+
+  interface IHandle {
+    meta?: IMeta;
     name?: string;
-    element?: React.LazyExoticComponent<() => JSX.Element>;
-    meta: IMeta;
+  }
+
+  interface IRouter {
+    id?: string;
+    index?: boolean;
+    path?: string;
+    name?: string;
+    component?: RouteComponentImporter;
+    element?: React.ReactNode;
+    meta?: IMeta;
+    handle?: IHandle;
     children?: IRouter[];
   }
 }
