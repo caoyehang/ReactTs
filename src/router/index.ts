@@ -1,7 +1,5 @@
 // 从 React 中引入 Suspense、createElement 和 lazy，用于懒加载页面组件。
 import { Suspense, createElement, lazy } from "react";
-// 引入 React Router 的路由对象类型，便于约束最终路由结构。
-import type { RouteObject } from "react-router-dom";
 // 引入导航组件和浏览器路由创建函数。
 import { Navigate, createBrowserRouter } from "react-router-dom";
 // 引入模块化页面路由配置。
@@ -11,7 +9,7 @@ import moduleRoutes from "./modules";
 const routeLoading = createElement("div", { className: "loading-spinner" });
 
 // 将页面组件导入函数转换成可直接挂到路由里的懒加载元素。
-function renderLazyRoute(importer: IRouterType.RouteComponentImporter) {
+const renderLazyRoute = (importer: IRouterType.RouteComponentImporter) => {
   // 基于传入的导入函数生成 React 懒组件。
   const Component = lazy(importer);
 
@@ -24,7 +22,7 @@ function renderLazyRoute(importer: IRouterType.RouteComponentImporter) {
     // 创建实际要渲染的懒组件元素。
     createElement(Component),
   );
-}
+};
 
 // 声明应用的基础路由配置。
 const routes: IRouterType.IRouter[] = [
@@ -87,7 +85,9 @@ const routes: IRouterType.IRouter[] = [
 ];
 
 // 将自定义路由配置转换为 React Router 可识别的 RouteObject。
-function toRouteObject(route: IRouterType.IRouter): RouteObject {
+const toRouteObject = (
+  route: IRouterType.IRouter,
+): IRouterType.AppRouteObject => {
   // 从自定义路由对象中解构出后续要参与转换的字段。
   const { children, component, meta, name, handle, element, id, index, path } =
     route;
@@ -125,16 +125,18 @@ function toRouteObject(route: IRouterType.IRouter): RouteObject {
     // 递归转换当前路由的所有子路由。
     children: children?.length ? normalizeRoutes(children) : undefined,
   };
-}
+};
 
 // 批量转换自定义路由数组。
-function normalizeRoutes(routes: IRouterType.IRouter[]): RouteObject[] {
+const normalizeRoutes = (
+  routes: IRouterType.IRouter[],
+): IRouterType.AppRouteObject[] => {
   // 逐个将自定义路由转换成标准 RouteObject。
   return routes.map(toRouteObject);
-}
+};
 
 // 生成最终可供路由实例使用的标准路由数组。
-export const appRoutes: RouteObject[] = normalizeRoutes(routes);
+export const appRoutes: IRouterType.AppRouteObject[] = normalizeRoutes(routes);
 // 基于标准路由数组创建浏览器路由实例。
 export const appRouter = createBrowserRouter(appRoutes);
 

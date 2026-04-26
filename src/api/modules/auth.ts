@@ -14,7 +14,6 @@ export interface LoginResult {
 export function login(data: LoginParams) {
   return request<LoginResult>("/login", {
     method: "POST",
-    body: data,
+    data,
   });
 }
-

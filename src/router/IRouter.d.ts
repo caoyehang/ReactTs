@@ -1,4 +1,6 @@
 declare namespace IRouterType {
+  type RouteElement = import("react").ReactNode;
+  type AppRouteObject = import("react-router-dom").RouteObject;
   type RouteComponentImporter = () => Promise<{ default: () => JSX.Element }>;
 
   interface IMeta {
@@ -18,7 +20,7 @@ declare namespace IRouterType {
     path?: string;
     name?: string;
     component?: RouteComponentImporter;
-    element?: React.ReactNode;
+    element?: RouteElement;
     meta?: IMeta;
     handle?: IHandle;
     children?: IRouter[];
