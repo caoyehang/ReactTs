@@ -1,19 +1,20 @@
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { Button, Form, Input, Typography } from "antd";
 import { useNavigate } from "react-router-dom";
-
-interface LoginFormValues {
-  username: string;
-  password: string;
-}
+import { login } from "@/api/modules/auth";
+import { useAppDispatch } from "@/store";
+import { syncToken } from "@/store/modules/auth";
+import type { LoginFormValues } from "@/types";
 
 const index = () => {
   const [form] = Form.useForm<LoginFormValues>();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const handleFinish = (values: LoginFormValues) => {
-    // 后续可在这里调用 authApi.login(values)
-    console.log("login form values:", values);
+  const handleFinish = async (values: LoginFormValues) => {
+    const { token } = await login(values);
+
+    dispatch(syncToken(token));
     navigate("/home");
   };
 

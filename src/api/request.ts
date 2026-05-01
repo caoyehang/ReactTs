@@ -1,12 +1,12 @@
 import axios, { AxiosError, AxiosHeaders } from "axios"; // 引入 axios、错误类型与请求头工具。
 import { message } from "antd"; // 引入 antd 的全局消息提示。
+import { store } from "@/store";
 import type { ApiResponse, RequestConfig, RequestMethods } from "./types"; // 引入请求层使用的共享类型。
 const requestInstance = axios.create({
   // 创建 axios 实例。
   baseURL: import.meta.env.VITE_API_BASE_URL, // 从环境变量读取接口基础地址。
   timeout: 10000, // 设置请求超时时间为 10 秒。
 }); // 完成 axios 实例初始化。
-const TOKEN_KEY = "token"; // 定义本地存储中的 token 键名。
 let errorMessageVisible = false; // 记录当前是否已有错误提示在展示。
 const showErrorOnce = (content: string) => {
   // 只展示一次错误消息的箭头函数。
@@ -24,7 +24,7 @@ requestInstance.interceptors.request.use(
   // 注册统一请求拦截器。
   (config) => {
     // 处理发起请求前的配置。
-    const token = localStorage.getItem(TOKEN_KEY); // 从本地存储中读取 token。
+    const token = store.getState().auth.token; // 从 Redux 内存中读取当前 token。
     if (token) {
       // 仅在 token 存在时注入请求头。
       const headers = AxiosHeaders.from(config.headers); // 统一转换为 AxiosHeaders 实例。
