@@ -7,4 +7,5 @@ export const siderStyle = {
 export const headerStyle = {
   backgroundColor: "rgba(255, 255, 255, 0.85)",
   color: "rgba(0, 0, 0, 0.88)",
+  padding: "0 20px",
 };

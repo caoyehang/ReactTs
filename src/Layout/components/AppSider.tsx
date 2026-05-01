@@ -1,3 +1,4 @@
+import { useAppSelector } from "@/store";
 import moduleRoutes from "@/router/modules";
 import { siderStyle } from "@/utils/layout";
 import type { MenuProps } from "antd";
@@ -49,6 +50,9 @@ const AppSider = () => {
   // 获取编程式导航函数，用于在点击菜单项后跳转到对应路由。
   const navigate = useNavigate();
 
+  // 直接消费 Redux 中的折叠状态，确保与 Header 操作同步。
+  const siderCollapsed = useAppSelector((state) => state.auth.siderCollapsed);
+
   const handleMenuClick: MenuProps["onClick"] = (e) => {
     navigate(e.key);
   };
@@ -60,7 +64,12 @@ const AppSider = () => {
   );
 
   return (
-    <Sider style={siderStyle} width={240}>
+    <Sider
+      style={siderStyle}
+      width={240}
+      collapsed={siderCollapsed}
+      trigger={null}
+    >
       <Menu
         theme="dark"
         onClick={handleMenuClick}

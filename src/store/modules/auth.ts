@@ -7,6 +7,8 @@ import type { AuthState } from "@/types";
 const initialState: AuthState = {
   // Access Token 仅保存在 Redux 内存中，首次加载时默认为空。
   token: null,
+  // 统一保存侧边栏折叠状态，供 Header 与 Sider 共享。
+  siderCollapsed: false,
   // 结束初始状态对象定义。
 };
 
@@ -24,13 +26,17 @@ const authSlice = createSlice({
       state.token = action.payload;
       // 结束 syncToken reducer。
     },
+    // 切换侧边栏折叠状态，避免布局组件各自维护本地状态。
+    toggleSiderCollapsed: (state) => {
+      state.siderCollapsed = !state.siderCollapsed;
+    },
     // 结束 reducers 配置对象。
   },
   // 结束 createSlice 配置对象。
 });
 
-// 导出切片自动生成的 syncToken action。
-export const { syncToken } = authSlice.actions;
+// 导出切片自动生成的认证与布局 action。
+export const { syncToken, toggleSiderCollapsed } = authSlice.actions;
 
 // 默认导出认证切片 reducer。
 export default authSlice.reducer;

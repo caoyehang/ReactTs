@@ -6,7 +6,7 @@ import { useAppDispatch } from "@/store";
 import { syncToken } from "@/store/modules/auth";
 import type { LoginFormValues } from "@/types";
 
-const index = () => {
+const Index = () => {
   const [form] = Form.useForm<LoginFormValues>();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -20,13 +20,13 @@ const index = () => {
 
   return (
     // 页面主容器：全屏高度、浅灰背景、水平居中；通过顶部内边距把登录框下移到视觉中心附近。
-    <div className="min-h-screen bg-[#efefef] flex justify-center px-4 pt-[240px] pb-6">
+    <div className="min-h-screen bg-[#efefef] flex justify-center px-4 pt-60 pb-6">
       {/* 登录卡片宽度：移动端自适应，桌面端最大 460px。 */}
-      <div className="w-full max-w-[460px]">
+      <div className="w-full max-w-115">
         <Typography.Title
           level={1}
           // 覆盖 antd 默认标题样式：去掉顶部 margin、加大字号并居中。
-          className="!mt-0 !mb-10 !text-center !text-[40px] !leading-[1.1] !font-bold"
+          className="mt-0! mb-10! text-center! text-[40px]! leading-[1.1]! font-bold!"
         >
           BO Admin
         </Typography.Title>
@@ -41,13 +41,13 @@ const index = () => {
             name="username"
             rules={[{ required: true, message: "Username is required" }]}
             // 用户名输入框与下一个表单项的间距。
-            className="!mb-[18px]"
+            className="mb-4.5!"
           >
             <Input
               placeholder="Username"
-              prefix={<UserOutlined className="!text-[#555]" />}
+              prefix={<UserOutlined className="text-[#555]!" />}
               // 输入框高度/圆角/字号统一。
-              className="!h-[46px] !rounded-[10px] !text-[18px]"
+              className="h-11.5! rounded-[10px]! text-[18px]!"
             />
           </Form.Item>
 
@@ -55,23 +55,23 @@ const index = () => {
             name="password"
             rules={[{ required: true, message: "Password is required" }]}
             // 密码框与登录按钮的间距略大，形成主次分组。
-            className="!mb-[24px]"
+            className="mb-6!"
           >
             <Input.Password
               placeholder="Password"
-              prefix={<LockOutlined className="!text-[#555]" />}
+              prefix={<LockOutlined className="text-[#555]!" />}
               // 与用户名输入框保持一致的尺寸和视觉风格。
-              className="!h-[46px] !rounded-[10px] !text-[18px]"
+              className="h-11.5! rounded-[10px]! text-[18px]!"
             />
           </Form.Item>
 
-          <Form.Item className="!mb-0">
+          <Form.Item className="mb-0!">
             <Button
               type="primary"
               htmlType="submit"
               block
               // 主按钮更高更大字，突出主要操作。
-              className="!h-[48px] !rounded-[10px] !text-[22px] !font-medium"
+              className="h-12! rounded-[10px]! text-[22px]! font-medium!"
             >
               Login
             </Button>
@@ -82,4 +82,4 @@ const index = () => {
   );
 };
 
-export default index;
+export default Index;

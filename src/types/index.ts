@@ -1,5 +1,6 @@
 export type AuthState = {
   token: string | null;
+  siderCollapsed: boolean;
 };
 
 export interface LoginFormValues {
