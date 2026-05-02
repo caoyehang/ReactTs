@@ -4,7 +4,7 @@ import { siderStyle } from "@/utils/layout";
 import type { MenuProps } from "antd";
 import { Layout, Menu } from "antd";
 import { useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const { Sider } = Layout;
 
@@ -49,6 +49,7 @@ const createMenuItems = (
 const AppSider = () => {
   // 获取编程式导航函数，用于在点击菜单项后跳转到对应路由。
   const navigate = useNavigate();
+  const { pathname } = useLocation();
 
   // 直接消费 Redux 中的折叠状态，确保与 Header 操作同步。
   const siderCollapsed = useAppSelector((state) => state.auth.siderCollapsed);
@@ -63,6 +64,20 @@ const AppSider = () => {
     [],
   );
 
+  const selectedKeys = useMemo(() => [pathname], [pathname]);
+
+  const openKeys = useMemo(() => {
+    const segments = pathname.split("/").filter(Boolean);
+
+    if (segments.length <= 1) {
+      return [];
+    }
+
+    return segments
+      .slice(0, -1)
+      .map((_, index) => `/${segments.slice(0, index + 1).join("/")}`);
+  }, [pathname]);
+
   return (
     <Sider
       style={siderStyle}
@@ -76,6 +91,8 @@ const AppSider = () => {
         className="bg-transparent border-none"
         mode="inline"
         items={items}
+        selectedKeys={selectedKeys}
+        defaultOpenKeys={openKeys}
       />
     </Sider>
   );
