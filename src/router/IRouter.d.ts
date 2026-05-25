@@ -7,7 +7,7 @@ declare namespace IRouterType {
   interface IMeta {
     title: string;
     i18nNamespace?: RouteI18nNamespace;
-    icon?: string;
+    icon?: RouteElement;
     keepAlive?: boolean;
   }
 

@@ -6,6 +6,7 @@ import type { MenuProps } from "antd";
 import { Layout, Menu } from "antd";
 import { useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { HomeOutlined } from "@ant-design/icons";
 
 const { Sider } = Layout;
 
@@ -37,11 +38,11 @@ const createMenuItems = (
       return {
         key: fullPath || route.id || route.name || route.meta!.title,
         label: tRoute(route.meta!.title, route.meta?.i18nNamespace),
+        icon: route.meta?.icon,
         children: children?.length ? children : undefined,
       };
     });
 };
-
 const AppSider = () => {
   useAppTranslation();
   // 获取编程式导航函数，用于在点击菜单项后跳转到对应路由。
@@ -60,6 +61,7 @@ const AppSider = () => {
     const homeMenuItem = {
       key: "/home",
       label: tRoute("home", I18N_NAMESPACE.ROUTES_ROOT),
+      icon: <HomeOutlined />,
     };
 
     return [homeMenuItem, ...(createMenuItems(moduleRoutes) ?? [])];

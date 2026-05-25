@@ -1,4 +1,6 @@
 import { I18N_NAMESPACE } from "@/locales";
+import { MailOutlined } from "@ant-design/icons";
+import { createElement } from "react";
 
 const routes: IRouterType.IRouter[] = [
   {
@@ -8,7 +10,7 @@ const routes: IRouterType.IRouter[] = [
     meta: {
       title: "member",
       i18nNamespace: I18N_NAMESPACE.ROUTES_MEMBER,
-      icon: "ant-design:team-outlined",
+      icon: createElement(MailOutlined),
     },
     children: [
       {
