@@ -1,5 +1,6 @@
 // 从 React 中引入 Suspense、createElement 和 lazy，用于懒加载页面组件。
 import { Suspense, createElement, lazy } from "react";
+import { I18N_NAMESPACE } from "@/locales";
 // 引入导航组件和浏览器路由创建函数。
 import { Navigate, createBrowserRouter } from "react-router-dom";
 // 引入模块化页面路由配置。
@@ -33,7 +34,10 @@ const routes: IRouterType.IRouter[] = [
     // 当前布局路由的访问路径。
     path: "/",
     // 当前布局路由的元信息。
-    meta: { title: "layout" },
+    meta: {
+      title: "layout",
+      i18nNamespace: I18N_NAMESPACE.ROUTES_ROOT,
+    },
     // 当前布局路由对应的页面组件导入函数。
     component: () => import("@/Layout/index"),
     // 定义布局下挂载的子路由。
@@ -52,7 +56,10 @@ const routes: IRouterType.IRouter[] = [
         // 首页路由的路径。
         path: "/home",
         // 首页路由的元信息。
-        meta: { title: "首页" },
+        meta: {
+          title: "home",
+          i18nNamespace: I18N_NAMESPACE.ROUTES_ROOT,
+        },
         // 首页路由对应的页面组件导入函数。
         component: () => import("@/pages/home/index"),
       },
@@ -67,7 +74,10 @@ const routes: IRouterType.IRouter[] = [
     // 登录页路由的访问路径。
     path: "/login",
     // 登录页路由的元信息。
-    meta: { title: "登录" },
+    meta: {
+      title: "login",
+      i18nNamespace: I18N_NAMESPACE.ROUTES_ROOT,
+    },
     // 登录页对应的页面组件导入函数。
     component: () => import("@/pages/login/index"),
   },
@@ -78,7 +88,10 @@ const routes: IRouterType.IRouter[] = [
     // 404 路由的匹配路径。
     path: "*",
     // 404 路由的元信息。
-    meta: { title: "404" },
+    meta: {
+      title: "notFound",
+      i18nNamespace: I18N_NAMESPACE.ROUTES_ROOT,
+    },
     // 404 路由对应的页面组件导入函数。
     component: () => import("@/pages/notFound/index"),
   },

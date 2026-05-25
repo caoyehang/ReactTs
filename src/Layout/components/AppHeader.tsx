@@ -1,3 +1,4 @@
+import { I18N_NAMESPACE, useAppTranslation } from "@/locales";
 import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
 import { useAppDispatch, useAppSelector } from "@/store";
 import { toggleSiderCollapsed } from "@/store/modules/auth";
@@ -7,6 +8,7 @@ import { Layout } from "antd";
 const { Header } = Layout;
 
 const AppHeader = () => {
+  const { t } = useAppTranslation(I18N_NAMESPACE.LAYOUT);
   const dispatch = useAppDispatch();
 
   // 从 Redux 读取折叠状态，保证图标与侧边栏展示保持一致。
@@ -26,7 +28,7 @@ const AppHeader = () => {
       <span
         role="button"
         tabIndex={0}
-        aria-label={siderCollapsed ? "展开侧边栏" : "收缩侧边栏"}
+        aria-label={siderCollapsed ? t("expandSider") : t("collapseSider")}
         onClick={handleToggleSider}
         onKeyDown={(event) => {
           if (event.key === "Enter" || event.key === " ") {

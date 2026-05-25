@@ -1,0 +1,14 @@
+{
+  "home": "首页",
+  "back": "返回",
+  "cancelText": "取消",
+  "chooseText": "请选择",
+  "operatingTitle": "操作成功",
+  "success": "成功",
+  "successA": "成功",
+  "closeText": "关闭",
+  "username": "用户名",
+  "password": "密码",
+  "usernameRequired": "请输入用户名",
+  "passwordRequired": "请输入密码"
+}

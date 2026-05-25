@@ -1,5 +1,9 @@
+import { I18N_NAMESPACE, useAppTranslation } from "@/locales";
+
 const index = () => {
-  return <div>404</div>;
+  const { t } = useAppTranslation(I18N_NAMESPACE.ROUTES_ROOT);
+
+  return <div>{t("notFound")}</div>;
 };
 
 export default index;

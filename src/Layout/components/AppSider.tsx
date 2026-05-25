@@ -1,3 +1,4 @@
+import { I18N_NAMESPACE, tRoute, useAppTranslation } from "@/locales";
 import { useAppSelector } from "@/store";
 import moduleRoutes from "@/router/modules";
 import { siderStyle } from "@/utils/layout";
@@ -7,11 +8,6 @@ import { useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 const { Sider } = Layout;
-
-const homeMenuItem = {
-  key: "/home",
-  label: "首页",
-};
 
 // 将子路由的相对路径补全为可直接用于菜单跳转的绝对路径。
 const normalizeMenuPath = (parentPath: string, currentPath?: string) => {
@@ -40,13 +36,14 @@ const createMenuItems = (
         : undefined;
       return {
         key: fullPath || route.id || route.name || route.meta!.title,
-        label: route.meta!.title,
+        label: tRoute(route.meta!.title, route.meta?.i18nNamespace),
         children: children?.length ? children : undefined,
       };
     });
 };
 
 const AppSider = () => {
+  useAppTranslation();
   // 获取编程式导航函数，用于在点击菜单项后跳转到对应路由。
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -59,10 +56,14 @@ const AppSider = () => {
   };
 
   // 缓存菜单项结果，避免组件每次渲染时都重新递归生成整棵菜单树。
-  const items = useMemo(
-    () => [homeMenuItem, ...(createMenuItems(moduleRoutes) ?? [])],
-    [],
-  );
+  const items = useMemo(() => {
+    const homeMenuItem = {
+      key: "/home",
+      label: tRoute("home", I18N_NAMESPACE.ROUTES_ROOT),
+    };
+
+    return [homeMenuItem, ...(createMenuItems(moduleRoutes) ?? [])];
+  }, []);
 
   const selectedKeys = useMemo(() => [pathname], [pathname]);
 

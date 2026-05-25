@@ -25,6 +25,7 @@
     /* Bundler mode */
     //用于指定模块解析策略。当设置为 "bundler" 时，TypeScript 会使用类似于 Webpack 的模块解析策略。
     "moduleResolution": "bundler",
+    "resolveJsonModule": true,
     // 用于指定是否允许导入 TypeScript 文件扩展名。当设置为 true 时，TypeScript 允许导入以 .ts 或 .tsx 结尾的文件。
     "allowImportingTsExtensions": true,
     // 是一个非常有用的选项，特别是在与现代构建工具（如 Webpack、Vite）或者与一些代码分割和热重载功能一起使用时。

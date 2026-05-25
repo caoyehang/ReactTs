@@ -1,0 +1,14 @@
+{
+  "home": "Home",
+  "back": "Back",
+  "cancelText": "Cancel",
+  "chooseText": "Please select",
+  "operatingTitle": "Operation completed",
+  "success": "Success",
+  "successA": "Success",
+  "closeText": "Close",
+  "username": "Username",
+  "password": "Password",
+  "usernameRequired": "Please enter username",
+  "passwordRequired": "Please enter password"
+}

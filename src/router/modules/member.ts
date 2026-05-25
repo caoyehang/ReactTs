@@ -1,9 +1,15 @@
+import { I18N_NAMESPACE } from "@/locales";
+
 const routes: IRouterType.IRouter[] = [
   {
     id: "member",
     path: "/member",
     name: "member",
-    meta: { title: "member", icon: "ant-design:team-outlined" },
+    meta: {
+      title: "member",
+      i18nNamespace: I18N_NAMESPACE.ROUTES_MEMBER,
+      icon: "ant-design:team-outlined",
+    },
     children: [
       {
         id: "member-group",
@@ -11,6 +17,7 @@ const routes: IRouterType.IRouter[] = [
         name: `member-group`,
         meta: {
           title: "memberGroup",
+          i18nNamespace: I18N_NAMESPACE.ROUTES_MEMBER,
           keepAlive: true,
         },
         component: () => import("@/pages/member/group/index"),
@@ -21,6 +28,7 @@ const routes: IRouterType.IRouter[] = [
         name: `member-info`,
         meta: {
           title: "memberInfo",
+          i18nNamespace: I18N_NAMESPACE.ROUTES_MEMBER,
           keepAlive: true,
         },
         component: () => import("@/pages/member/info/index"),
