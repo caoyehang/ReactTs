@@ -1,4 +1,3 @@
-import { I18N_NAMESPACE } from "@/locales";
 import { MailOutlined } from "@ant-design/icons";
 import { createElement } from "react";
 
@@ -8,8 +7,7 @@ const routes: IRouterType.IRouter[] = [
     path: "/member",
     name: "member",
     meta: {
-      title: "member",
-      i18nNamespace: I18N_NAMESPACE.ROUTES_MEMBER,
+      title: "router.member.member",
       icon: createElement(MailOutlined),
     },
     children: [
@@ -18,8 +16,7 @@ const routes: IRouterType.IRouter[] = [
         path: "group",
         name: `member-group`,
         meta: {
-          title: "memberGroup",
-          i18nNamespace: I18N_NAMESPACE.ROUTES_MEMBER,
+          title: "router.member.memberGroup",
           keepAlive: true,
         },
         component: () => import("@/pages/member/group/index"),
@@ -29,8 +26,7 @@ const routes: IRouterType.IRouter[] = [
         path: "info",
         name: `member-info`,
         meta: {
-          title: "memberInfo",
-          i18nNamespace: I18N_NAMESPACE.ROUTES_MEMBER,
+          title: "router.member.memberInfo",
           keepAlive: true,
         },
         component: () => import("@/pages/member/info/index"),

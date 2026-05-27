@@ -1,11 +1,11 @@
-import { I18N_NAMESPACE, useAppTranslation } from "@/locales";
+import { useAppTranslation } from "@/locales";
 import { Layout } from "antd";
 
 const { Footer } = Layout;
 const AppFooter = () => {
-  const { t } = useAppTranslation(I18N_NAMESPACE.LAYOUT);
+  const { t } = useAppTranslation();
 
-  return <Footer>{t("footerText")}</Footer>;
+  return <Footer>{t("layout.footerText")}</Footer>;
 };
 
 export default AppFooter;

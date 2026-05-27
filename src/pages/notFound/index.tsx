@@ -1,9 +1,9 @@
-import { I18N_NAMESPACE, useAppTranslation } from "@/locales";
+import { useAppTranslation } from "@/locales";
 
 const index = () => {
-  const { t } = useAppTranslation(I18N_NAMESPACE.ROUTES_ROOT);
+  const { t } = useAppTranslation();
 
-  return <div>{t("notFound")}</div>;
+  return <div>{t("router.root.notFound")}</div>;
 };
 
 export default index;

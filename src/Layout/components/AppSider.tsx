@@ -1,4 +1,4 @@
-import { I18N_NAMESPACE, tRoute, useAppTranslation } from "@/locales";
+import { t, useAppTranslation } from "@/locales";
 import { useAppSelector } from "@/store";
 import moduleRoutes from "@/router/modules";
 import { siderStyle } from "@/utils/layout";
@@ -37,7 +37,7 @@ const createMenuItems = (
         : undefined;
       return {
         key: fullPath || route.id || route.name || route.meta!.title,
-        label: tRoute(route.meta!.title, route.meta?.i18nNamespace),
+        label: t(route.meta!.title),
         icon: route.meta?.icon,
         children: children?.length ? children : undefined,
       };
@@ -60,7 +60,7 @@ const AppSider = () => {
   const items = useMemo(() => {
     const homeMenuItem = {
       key: "/home",
-      label: tRoute("home", I18N_NAMESPACE.ROUTES_ROOT),
+      label: t("router.root.home"),
       icon: <HomeOutlined />,
     };
 

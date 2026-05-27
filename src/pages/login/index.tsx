@@ -1,4 +1,4 @@
-import { I18N_NAMESPACE, useAppTranslation } from "@/locales";
+import { useAppTranslation } from "@/locales";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { Button, Form, Input, Typography } from "antd";
 import { useNavigate } from "react-router-dom";
@@ -8,10 +8,7 @@ import { syncToken } from "@/store/modules/auth";
 import type { LoginFormValues } from "@/types";
 
 const Index = () => {
-  const { t } = useAppTranslation([
-    I18N_NAMESPACE.COMMON,
-    I18N_NAMESPACE.ROUTES_ROOT,
-  ]);
+  const { t } = useAppTranslation();
   const [form] = Form.useForm<LoginFormValues>();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -44,12 +41,12 @@ const Index = () => {
         >
           <Form.Item
             name="username"
-            rules={[{ required: true, message: t("usernameRequired") }]}
+            rules={[{ required: true, message: t("common.usernameRequired") }]}
             // 用户名输入框与下一个表单项的间距。
             className="mb-4.5!"
           >
             <Input
-              placeholder={t("username")}
+              placeholder={t("common.username")}
               prefix={<UserOutlined className="text-[#555]!" />}
               // 输入框高度/圆角/字号统一。
               className="h-11.5! rounded-[10px]! text-[18px]!"
@@ -58,12 +55,12 @@ const Index = () => {
 
           <Form.Item
             name="password"
-            rules={[{ required: true, message: t("passwordRequired") }]}
+            rules={[{ required: true, message: t("common.passwordRequired") }]}
             // 密码框与登录按钮的间距略大，形成主次分组。
             className="mb-6!"
           >
             <Input.Password
-              placeholder={t("password")}
+              placeholder={t("common.password")}
               prefix={<LockOutlined className="text-[#555]!" />}
               // 与用户名输入框保持一致的尺寸和视觉风格。
               className="h-11.5! rounded-[10px]! text-[18px]!"
@@ -78,7 +75,7 @@ const Index = () => {
               // 主按钮更高更大字，突出主要操作。
               className="h-12! rounded-[10px]! text-[22px]! font-medium!"
             >
-              {t("login", { ns: I18N_NAMESPACE.ROUTES_ROOT })}
+              {t("router.root.login")}
             </Button>
           </Form.Item>
         </Form>

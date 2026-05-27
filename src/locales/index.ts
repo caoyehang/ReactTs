@@ -2,7 +2,7 @@
 // 同时引入 PropsWithChildren 类型，声明组件会接收 children。
 import { createElement, type PropsWithChildren } from "react";
 // 引入 i18next 实例本身，以及 Resource 类型用于约束资源结构。
-import i18n, { type Resource } from "i18next";
+import i18n, { type Resource, type TOptions } from "i18next";
 // 引入浏览器语言探测插件，用于自动识别用户当前语言。
 import LanguageDetector from "i18next-browser-languagedetector";
 // 引入 React 与 i18next 的桥接能力。
@@ -44,58 +44,45 @@ export const I18N_LANGUAGE = {
   EN_US: "en-US",
 } as const;
 
-// 定义应用内使用到的命名空间常量。
-export const I18N_NAMESPACE = {
-  // 通用文案命名空间。
-  COMMON: "common",
-  // 布局文案命名空间。
-  LAYOUT: "layout",
-  // 表格文案命名空间。
-  TABLE: "table",
-  // 根路由文案命名空间。
-  ROUTES_ROOT: "routes/root",
-  // 会员模块路由文案命名空间。
-  ROUTES_MEMBER: "routes/member",
-} as const;
-
 // 定义语言持久化到本地存储时使用的键名。
 export const I18N_STORAGE_KEY = "react-ts-language";
 
 // 从语言常量对象中推导出语言类型。
 export type AppLanguage = (typeof I18N_LANGUAGE)[keyof typeof I18N_LANGUAGE];
-// 从命名空间常量对象中推导出命名空间类型。
-export type AppNamespace = (typeof I18N_NAMESPACE)[keyof typeof I18N_NAMESPACE];
 
-// 提取全部命名空间，供 i18next 初始化时注册。
-export const appNamespaces = Object.values(I18N_NAMESPACE);
-
-// 按照 i18next Resource 结构组织中英文资源。
+// 按照单资源树结构组织中英文资源，业务统一使用完整 key 调用翻译。
 const resources: Resource = {
   // 中文资源集合。
   [I18N_LANGUAGE.ZH_CN]: {
-    // 中文通用文案。
-    [I18N_NAMESPACE.COMMON]: zhCommon,
-    // 中文布局文案。
-    [I18N_NAMESPACE.LAYOUT]: zhLayout,
-    // 中文表格文案。
-    [I18N_NAMESPACE.TABLE]: zhTable,
-    // 中文根路由文案。
-    [I18N_NAMESPACE.ROUTES_ROOT]: zhRootRoutes,
-    // 中文会员路由文案。
-    [I18N_NAMESPACE.ROUTES_MEMBER]: zhMemberRoutes,
+    translation: {
+      // 通用文案。
+      common: zhCommon,
+      // 布局文案。
+      layout: zhLayout,
+      // 表格文案。
+      table: zhTable,
+      // 路由文案。
+      router: {
+        root: zhRootRoutes,
+        member: zhMemberRoutes,
+      },
+    },
   },
   // 英文资源集合。
   [I18N_LANGUAGE.EN_US]: {
-    // 英文通用文案。
-    [I18N_NAMESPACE.COMMON]: enCommon,
-    // 英文布局文案。
-    [I18N_NAMESPACE.LAYOUT]: enLayout,
-    // 英文表格文案。
-    [I18N_NAMESPACE.TABLE]: enTable,
-    // 英文根路由文案。
-    [I18N_NAMESPACE.ROUTES_ROOT]: enRootRoutes,
-    // 英文会员路由文案。
-    [I18N_NAMESPACE.ROUTES_MEMBER]: enMemberRoutes,
+    translation: {
+      // 通用文案。
+      common: enCommon,
+      // 布局文案。
+      layout: enLayout,
+      // 表格文案。
+      table: enTable,
+      // 路由文案。
+      router: {
+        root: enRootRoutes,
+        member: enMemberRoutes,
+      },
+    },
   },
 };
 
@@ -115,10 +102,8 @@ if (!i18n.isInitialized) {
       fallbackLng: I18N_LANGUAGE.ZH_CN,
       // 明确声明支持的语言列表。
       supportedLngs: Object.values(I18N_LANGUAGE),
-      // 注册全部命名空间。
-      ns: appNamespaces,
-      // 默认使用 common 命名空间。
-      defaultNS: I18N_NAMESPACE.COMMON,
+      // 统一使用默认 translation 命名空间。
+      defaultNS: "translation",
       // 插值配置。
       interpolation: {
         // React 默认已处理转义，这里关闭 i18next 转义。
@@ -144,25 +129,15 @@ export const AppI18nProvider = ({ children }: PropsWithChildren) => {
   return createElement(I18nextProvider, { i18n }, children);
 };
 
-// 封装业务使用的翻译 Hook，默认落到 common 命名空间。
-export const useAppTranslation = (
-  // 允许传入单个或多个命名空间。
-  namespace?: AppNamespace | AppNamespace[],
-) => {
-  // 未传命名空间时默认使用 common。
-  return useTranslation(namespace ?? I18N_NAMESPACE.COMMON);
-};
+// 封装业务使用的翻译 Hook，统一通过完整 key 获取文案。
+export const useAppTranslation = () => useTranslation();
 
-// 用于翻译路由标题，默认读取根路由命名空间。
-export const tRoute = (title: string, namespace?: AppNamespace) => {
-  // 调用 i18n.t 执行实际翻译。
-  return i18n.t(title, {
-    // 可覆盖命名空间，否则默认使用 routes/root。
-    ns: namespace ?? I18N_NAMESPACE.ROUTES_ROOT,
-    // 当找不到翻译时直接显示原始标题。
-    defaultValue: title,
+// 提供非 React 场景下的翻译方法，统一使用完整 key。
+export const t = (key: string, options?: TOptions) =>
+  i18n.t(key, {
+    defaultValue: key,
+    ...options,
   });
-};
 
 // 对外暴露语言切换方法。
 export const changeLanguage = (language: AppLanguage) => {

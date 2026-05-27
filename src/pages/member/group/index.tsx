@@ -1,9 +1,9 @@
-import { I18N_NAMESPACE, useAppTranslation } from "@/locales";
+import { useAppTranslation } from "@/locales";
 
 const index = () => {
-  const { t } = useAppTranslation(I18N_NAMESPACE.ROUTES_MEMBER);
+  const { t } = useAppTranslation();
 
-  return <div>{t("memberGroup")}</div>;
+  return <div>{t("router.member.memberGroup")}</div>;
 };
 
 export default index;

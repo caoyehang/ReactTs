@@ -2,11 +2,9 @@ declare namespace IRouterType {
   type RouteElement = import("react").ReactNode;
   type AppRouteObject = import("react-router-dom").RouteObject;
   type RouteComponentImporter = () => Promise<{ default: () => JSX.Element }>;
-  type RouteI18nNamespace = import("@/locales").AppNamespace;
 
   interface IMeta {
     title: string;
-    i18nNamespace?: RouteI18nNamespace;
     icon?: RouteElement;
     keepAlive?: boolean;
   }
