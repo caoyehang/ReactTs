@@ -1,5 +1,7 @@
 {
   "collapseSider": "收起侧边栏",
   "expandSider": "展开侧边栏",
+  "switchLanguage": "切换语言",
+  "userMenu": "用户菜单",
   "footerText": "ReactTs 管理后台"
 }

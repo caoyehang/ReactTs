@@ -1,5 +1,7 @@
 {
   "collapseSider": "Collapse sidebar",
   "expandSider": "Expand sidebar",
+  "switchLanguage": "Switch language",
+  "userMenu": "User menu",
   "footerText": "ReactTs Admin Console"
 }

@@ -37,7 +37,7 @@ const createMenuItems = (
         : undefined;
       return {
         key: fullPath || route.id || route.name || route.meta!.title,
-        label: t(route.meta!.title),
+        label: route.meta!.title,
         icon: route.meta?.icon,
         children: children?.length ? children : undefined,
       };
