@@ -68,17 +68,7 @@ const AppHeader = () => {
       {/* 用轻量图标区域触发侧边栏折叠，减少按钮感。 */}
       <span
         role="button"
-        tabIndex={0}
-        aria-label={
-          siderCollapsed ? t("layout.expandSider") : t("layout.collapseSider")
-        }
         onClick={handleToggleSider}
-        onKeyDown={(event) => {
-          if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            handleToggleSider();
-          }
-        }}
         className="inline-flex cursor-pointer items-center justify-center p-1 text-lg text-slate-600 transition-colors hover:text-slate-900 focus:outline-none"
       >
         {siderCollapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
@@ -106,8 +96,6 @@ const AppHeader = () => {
             className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-slate-200 px-3 py-1.5 text-sm text-slate-600 transition-colors hover:border-slate-300 hover:text-slate-900 focus:outline-none"
           >
             <GlobalOutlined />
-            <span>{currentLanguage === I18N_LANGUAGE.ZH_CN ? "中" : "EN"}</span>
-            <DownOutlined className="text-xs" />
           </span>
         </Dropdown>
 

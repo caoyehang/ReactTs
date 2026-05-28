@@ -1,6 +1,5 @@
 import { MailOutlined } from "@ant-design/icons";
 import { createElement } from "react";
-import { t } from "@/locales";
 
 const routes: IRouterType.IRouter[] = [
   {
@@ -8,7 +7,7 @@ const routes: IRouterType.IRouter[] = [
     path: "/member",
     name: "member",
     meta: {
-      title: t("router.member.member"),
+      title: "router.member.member",
       icon: createElement(MailOutlined),
     },
     children: [
@@ -17,7 +16,7 @@ const routes: IRouterType.IRouter[] = [
         path: "group",
         name: `member-group`,
         meta: {
-          title: t("router.member.memberGroup"),
+          title: "router.member.memberGroup",
           keepAlive: true,
         },
         component: () => import("@/pages/member/group/index"),
@@ -27,7 +26,7 @@ const routes: IRouterType.IRouter[] = [
         path: "info",
         name: `member-info`,
         meta: {
-          title: t("router.member.memberInfo"),
+          title: "router.member.memberInfo",
           keepAlive: true,
         },
         component: () => import("@/pages/member/info/index"),

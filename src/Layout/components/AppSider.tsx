@@ -1,6 +1,7 @@
 import { t, useAppTranslation } from "@/locales";
 import { useAppSelector } from "@/store";
 import moduleRoutes from "@/router/modules";
+// 设置侧边栏样式，保持与整体布局一致。
 import { siderStyle } from "@/utils/layout";
 import type { MenuProps } from "antd";
 import { Layout, Menu } from "antd";
@@ -26,6 +27,7 @@ const normalizeMenuPath = (parentPath: string, currentPath?: string) => {
 // 递归把路由树转换为 antd Menu 所需的 items 结构。
 const createMenuItems = (
   routes: IRouterType.IRouter[],
+  translate: typeof t,
   parentPath = "",
 ): Required<MenuProps>["items"] => {
   return routes
@@ -33,18 +35,18 @@ const createMenuItems = (
     .map((route) => {
       const fullPath = normalizeMenuPath(parentPath, route.path);
       const children = route.children?.length
-        ? createMenuItems(route.children, fullPath)
+        ? createMenuItems(route.children, translate, fullPath)
         : undefined;
       return {
         key: fullPath || route.id || route.name || route.meta!.title,
-        label: route.meta!.title,
+        label: translate(route.meta!.title),
         icon: route.meta?.icon,
         children: children?.length ? children : undefined,
       };
     });
 };
 const AppSider = () => {
-  useAppTranslation();
+  const { t } = useAppTranslation();
   // 获取编程式导航函数，用于在点击菜单项后跳转到对应路由。
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -64,8 +66,8 @@ const AppSider = () => {
       icon: <HomeOutlined />,
     };
 
-    return [homeMenuItem, ...(createMenuItems(moduleRoutes) ?? [])];
-  }, []);
+    return [homeMenuItem, ...(createMenuItems(moduleRoutes, t) ?? [])];
+  }, [t]);
 
   const selectedKeys = useMemo(() => [pathname], [pathname]);
 
@@ -83,10 +85,11 @@ const AppSider = () => {
 
   return (
     <Sider
+      // siderStyle 已经包含了背景色和边框等样式，保持与整体布局一致。
       style={siderStyle}
       width={240}
+      // siderCollapsed 直接从 Redux 中获取，保证与 Header 的折叠状态同步。
       collapsed={siderCollapsed}
-      trigger={null}
     >
       <Menu
         theme="dark"
