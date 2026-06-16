@@ -1,0 +1,59 @@
+/* 引入 Tailwind CSS 样式层。 */
+@import "tailwindcss";
+
+/* 定义浅色与深色主题变量。 */
+@theme {
+  --color-bg: 255 255 255; /* 页面背景色。 */
+  --color-box: 255 255 255; /* 容器背景色。 */
+  --color-border: 229 231 235; /* 边框颜色。 */
+  --color-sd: 226 232 240 / 0.5; /* 阴影颜色。 */
+  --heading-1: 23 37 84; /* 一级标题颜色。 */
+  --heading-2: 31 41 55; /* 二级标题颜色。 */
+  --heading-3: 55 65 81; /* 三级标题颜色。 */
+}
+
+/* 定义深色主题下的变量覆盖。 */
+html.dark {
+  --color-bg: 3 7 18; /* 深色页面背景。 */
+  --color-box: 17 23 39; /* 深色容器背景。 */
+  --color-border: 243 244 246 / 0.1; /* 深色边框颜色。 */
+  --color-sd: transparent; /* 深色模式下关闭阴影。 */
+  --heading-1: 255 255 255; /* 深色一级标题颜色。 */
+  --heading-2: 243 244 246; /* 深色二级标题颜色。 */
+  --heading-3: 209 213 219; /* 深色三级标题颜色。 */
+}
+
+/* 把主题变量封装为 Tailwind 工具类。 */
+@layer utilities {
+  .bg-body {
+    background: rgb(var(--color-bg)); /* 使用页面背景变量。 */
+  }
+
+  .bg-box-bg {
+    background: rgb(var(--color-box)); /* 使用容器背景变量。 */
+  }
+
+  .text-heading-1 {
+    color: rgb(var(--heading-1)); /* 使用一级标题变量。 */
+  }
+
+  .text-heading-2 {
+    color: rgb(var(--heading-2)); /* 使用二级标题变量。 */
+  }
+
+  .text-heading-3 {
+    color: rgb(var(--heading-3)); /* 使用三级标题变量。 */
+  }
+}
+
+/* 统一页面根节点基础样式。 */
+html,
+body,
+#root {
+  scroll-behavior: smooth; /* 开启平滑滚动。 */
+  font-family: "Raleway", sans-serif; /* 设置应用默认字体。 */
+  height: 100%; /* 让应用根节点占满视口高度。 */
+  margin: 0; /* 移除浏览器默认外边距。 */
+  padding: 0; /* 移除浏览器默认内边距。 */
+  background: #f5f5f5; /* 设置全局浅灰背景。 */
+}

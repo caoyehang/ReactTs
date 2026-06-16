@@ -1,25 +1,25 @@
-// 从 React 中引入 Suspense、createElement 和 lazy，用于懒加载页面组件。
+// 从 React 引入懒加载、元素创建和 Suspense 能力。
 import { Suspense, createElement, lazy } from "react";
-// 引入导航组件和浏览器路由创建函数。
+// 从 React Router 引入重定向组件和浏览器路由创建函数。
 import { Navigate, createBrowserRouter } from "react-router-dom";
-// 引入模块化页面路由配置。
+// 引入业务模块路由，主路由只负责聚合。
 import moduleRoutes from "./modules";
 
-// 定义路由懒加载期间的占位元素。
+// 定义页面懒加载期间的占位元素。
 const routeLoading = createElement("div", { className: "loading-spinner" });
 
-// 将页面组件导入函数转换成可直接挂到路由里的懒加载元素。
+// 把页面导入函数转换成 React Router 可以渲染的懒加载元素。
 const renderLazyRoute = (importer: IRouterType.RouteComponentImporter) => {
-  // 基于传入的导入函数生成 React 懒组件。
+  // 基于传入的动态 import 创建懒加载组件。
   const Component = lazy(importer);
 
-  // 返回带有 Suspense 包裹的懒加载组件元素。
+  // 返回带 Suspense 兜底内容的路由元素。
   return createElement(
-    // 使用 Suspense 处理异步组件加载过程。
+    // 使用 Suspense 接管异步组件加载状态。
     Suspense,
-    // 指定组件加载中的兜底内容。
+    // 指定组件加载过程中的兜底内容。
     { fallback: routeLoading },
-    // 创建实际要渲染的懒组件元素。
+    // 创建实际要渲染的懒加载组件元素。
     createElement(Component),
   );
 };
@@ -28,90 +28,90 @@ const renderLazyRoute = (importer: IRouterType.RouteComponentImporter) => {
 const routes: IRouterType.IRouter[] = [
   // 定义应用主布局路由。
   {
-    // 当前布局路由的唯一标识。
+    // 为布局路由提供稳定标识。
     id: "layout",
-    // 当前布局路由的访问路径。
+    // 指定布局路由的访问路径。
     path: "/",
-    // 当前布局路由的元信息。
+    // 提供布局路由的元信息。
     meta: {
       title: "router.root.layout",
     },
-    // 当前布局路由对应的页面组件导入函数。
-    component: () => import("@/Layout/index"),
+    // 懒加载主布局组件，减少首屏同步代码体积。
+    component: () => import("@/layouts/index"),
     // 定义布局下挂载的子路由。
     children: [
       // 定义进入根路径后的默认重定向路由。
       {
         // 标记当前子路由为 index 路由。
         index: true,
-        // 将根路径重定向到首页路径。
+        // 将根路径重定向到首页。
         element: createElement(Navigate, { to: "/home", replace: true }),
       },
       // 定义首页常规路由。
       {
-        // 首页路由的唯一标识。
+        // 提供首页路由标识。
         id: "home",
-        // 首页路由的路径。
+        // 提供首页访问路径。
         path: "/home",
-        // 首页路由的元信息。
+        // 提供首页路由元信息。
         meta: {
           title: "router.root.home",
         },
-        // 首页路由对应的页面组件导入函数。
+        // 懒加载首页页面组件。
         component: () => import("@/pages/home/index"),
       },
-      // 展开所有模块化业务路由。
+      // 展开所有业务模块路由。
       ...moduleRoutes,
     ],
   },
-  // 定义登录页常规路由。
+  // 定义登录页路由。
   {
-    // 登录页路由的唯一标识。
+    // 提供登录路由标识。
     id: "login",
-    // 登录页路由的访问路径。
+    // 提供登录页访问路径。
     path: "/login",
-    // 登录页路由的元信息。
+    // 提供登录页元信息。
     meta: {
       title: "router.root.login",
     },
-    // 登录页对应的页面组件导入函数。
+    // 懒加载登录页组件。
     component: () => import("@/pages/login/index"),
   },
-  // 定义 404 页面路由。
+  // 定义 404 兜底路由。
   {
-    // 404 路由的唯一标识。
+    // 提供 404 路由标识。
     id: "not-found",
-    // 404 路由的匹配路径。
+    // 匹配所有未命中的路径。
     path: "*",
-    // 404 路由的元信息。
+    // 提供 404 页面元信息。
     meta: {
       title: "router.root.notFound",
     },
-    // 404 路由对应的页面组件导入函数。
+    // 懒加载 404 页面组件。
     component: () => import("@/pages/notFound/index"),
   },
 ];
 
-// 将自定义路由配置转换为 React Router 可识别的 RouteObject。
+// 将自定义路由配置转换成 React Router 可识别的 RouteObject。
 const toRouteObject = (
   route: IRouterType.IRouter,
 ): IRouterType.AppRouteObject => {
-  // 从自定义路由对象中解构出后续要参与转换的字段。
+  // 解构当前路由中参与转换的字段。
   const { children, component, meta, name, handle, element, id, index, path } =
     route;
-  // 优先使用已有 element，否则基于 component 生成懒加载元素。
+  // 优先使用已提供的元素，否则根据 component 生成懒加载元素。
   const resolvedElement =
     element ?? (component ? renderLazyRoute(component) : undefined);
-  // 优先使用已有 handle，否则基于 meta 和 name 生成默认 handle。
+  // 优先使用自定义 handle，否则把 meta 和 name 收进默认 handle。
   const resolvedHandle = handle ?? { meta, name };
 
-  // 如果当前是索引路由，则返回索引路由结构。
+  // 如果当前是 index 路由，则返回 index 路由结构。
   if (index) {
-    // 返回索引路由对象。
+    // 返回 React Router 需要的 index 路由对象。
     return {
       // 保留路由唯一标识。
       id,
-      // 明确标记为 index 路由。
+      // 标记这是 index 路由。
       index: true,
       // 挂载当前路由的渲染元素。
       element: resolvedElement,
@@ -139,11 +139,11 @@ const toRouteObject = (
 const normalizeRoutes = (
   routes: IRouterType.IRouter[],
 ): IRouterType.AppRouteObject[] => {
-  // 逐个将自定义路由转换成标准 RouteObject。
+  // 逐个把自定义路由转换为标准 RouteObject。
   return routes.map(toRouteObject);
 };
 
-// 生成最终可供路由实例使用的标准路由数组。
+// 生成最终供路由实例使用的标准路由数组。
 export const appRoutes: IRouterType.AppRouteObject[] = normalizeRoutes(routes);
 // 基于标准路由数组创建浏览器路由实例。
 export const appRouter = createBrowserRouter(appRoutes);

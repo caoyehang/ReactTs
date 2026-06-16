@@ -1,0 +1,20 @@
+/* 定义路由懒加载占位动画容器。 */
+.loading-spinner {
+  width: 50px; /* 设置加载器宽度。 */
+  height: 50px; /* 设置加载器高度。 */
+  border: 5px solid #f3f3f3; /* 设置浅色圆环边框。 */
+  border-top: 5px solid #3498db; /* 设置顶部高亮边框。 */
+  border-radius: 50%; /* 把方形元素裁成圆形。 */
+  animation: spin 2s linear infinite; /* 持续播放旋转动画。 */
+}
+
+/* 定义旋转动画关键帧。 */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg); /* 动画起点不旋转。 */
+  }
+
+  100% {
+    transform: rotate(360deg); /* 动画终点旋转一圈。 */
+  }
+}

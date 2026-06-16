@@ -1,7 +1,12 @@
+// 定义 TypeScript 项目引用入口。
 {
+  // 根配置本身不直接包含源文件。
   "files": [],
+  // 引用应用端与 Node 端两个子配置。
   "references": [
+    // 浏览器端应用源码配置。
     { "path": "./tsconfig.app.json" },
+    // Vite 配置等 Node 端源码配置。
     { "path": "./tsconfig.node.json" }
   ]
 }

@@ -1,78 +1,98 @@
+// 引入业务翻译 Hook。
 import { useAppTranslation } from "@/locales";
+// 引入登录表单所需图标。
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
+// 引入 antd 表单、输入框、按钮和标题组件。
 import { Button, Form, Input, Typography } from "antd";
+// 引入编程式导航 Hook。
 import { useNavigate } from "react-router-dom";
+// 引入登录接口方法。
 import { login } from "@/api/modules/auth";
+// 引入带类型的 Redux dispatch Hook。
 import { useAppDispatch } from "@/store";
+// 引入同步 token 的 action。
 import { syncToken } from "@/store/modules/auth";
+// 引入登录表单字段类型。
 import type { LoginFormValues } from "@/types";
 
-const Index = () => {
+// 定义登录页面组件。
+const LoginPage = () => {
+  // 获取翻译函数。
   const { t } = useAppTranslation();
+  // 创建 antd 表单实例。
   const [form] = Form.useForm<LoginFormValues>();
+  // 获取 Redux dispatch。
   const dispatch = useAppDispatch();
+  // 获取编程式导航函数。
   const navigate = useNavigate();
 
+  // 处理登录表单提交。
   const handleFinish = async (values: LoginFormValues) => {
+    // 调用登录接口并读取 token。
     const { token } = await login(values);
 
+    // 将 token 同步到 Redux。
     dispatch(syncToken(token));
+    // 登录成功后跳转首页。
     navigate("/home");
   };
 
+  // 渲染登录页面。
   return (
-    // 页面主容器：全屏高度、浅灰背景、水平居中；通过顶部内边距把登录框下移到视觉中心附近。
+    // 页面主容器负责全屏背景和居中排版。
     <div className="min-h-screen bg-[#efefef] flex justify-center px-4 pt-60 pb-6">
-      {/* 登录卡片宽度：移动端自适应，桌面端最大 460px。 */}
+      {/* 登录表单容器限制最大宽度。 */}
       <div className="w-full max-w-115">
+        {/* 系统标题。 */}
         <Typography.Title
           level={1}
-          // 覆盖 antd 默认标题样式：去掉顶部 margin、加大字号并居中。
           className="mt-0! mb-10! text-center! text-[40px]! leading-[1.1]! font-bold!"
         >
           BO Admin
         </Typography.Title>
 
+        {/* 登录表单。 */}
         <Form<LoginFormValues>
           form={form}
           onFinish={handleFinish}
           autoComplete="off"
           size="large"
         >
+          {/* 用户名表单项。 */}
           <Form.Item
             name="username"
             rules={[{ required: true, message: t("common.usernameRequired") }]}
-            // 用户名输入框与下一个表单项的间距。
             className="mb-4.5!"
           >
+            {/* 用户名输入框。 */}
             <Input
               placeholder={t("common.username")}
               prefix={<UserOutlined className="text-[#555]!" />}
-              // 输入框高度/圆角/字号统一。
               className="h-11.5! rounded-[10px]! text-[18px]!"
             />
           </Form.Item>
 
+          {/* 密码表单项。 */}
           <Form.Item
             name="password"
             rules={[{ required: true, message: t("common.passwordRequired") }]}
-            // 密码框与登录按钮的间距略大，形成主次分组。
             className="mb-6!"
           >
+            {/* 密码输入框。 */}
             <Input.Password
               placeholder={t("common.password")}
               prefix={<LockOutlined className="text-[#555]!" />}
-              // 与用户名输入框保持一致的尺寸和视觉风格。
               className="h-11.5! rounded-[10px]! text-[18px]!"
             />
           </Form.Item>
 
+          {/* 提交按钮表单项。 */}
           <Form.Item className="mb-0!">
+            {/* 登录提交按钮。 */}
             <Button
               type="primary"
               htmlType="submit"
               block
-              // 主按钮更高更大字，突出主要操作。
               className="h-12! rounded-[10px]! text-[22px]! font-medium!"
             >
               {t("router.root.login")}
@@ -84,4 +104,5 @@ const Index = () => {
   );
 };
 
-export default Index;
+// 默认导出登录页面。
+export default LoginPage;
