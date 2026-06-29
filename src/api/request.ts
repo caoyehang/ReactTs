@@ -10,7 +10,7 @@ import type { ApiResponse, RequestConfig, RequestMethods } from "./types";
 // 创建统一 axios 实例。
 const requestInstance = axios.create({
   // 从环境变量读取接口基础地址。
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: import.meta.env.VITE_BASE_API_URL,
   // 设置请求超时时间为 10 秒。
   timeout: 10000,
 });

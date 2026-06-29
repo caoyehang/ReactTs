@@ -29,7 +29,10 @@ const LoginPage = () => {
   // 处理登录表单提交。
   const handleFinish = async (values: LoginFormValues) => {
     // 调用登录接口并读取 token。
-    const { token } = await login(values);
+    const { token } = await login({
+      userName: values.username,
+      password: values.password,
+    });
 
     // 将 token 同步到 Redux。
     dispatch(syncToken(token));

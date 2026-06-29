@@ -35,7 +35,7 @@ export interface RequestMethods {
 // 定义登录请求参数。
 export interface LoginParams {
   // 登录用户名。
-  username: string;
+  userName: string;
   // 登录密码。
   password: string;
 }
