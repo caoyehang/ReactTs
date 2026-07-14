@@ -5,7 +5,7 @@ import { LockOutlined, SafetyCertificateOutlined, UserOutlined } from "@ant-desi
 // 引入 antd 表单、输入框、按钮和标题组件。
 import { Button, Form, Input, Typography } from "antd";
 // 引入 React 状态与生命周期 Hook。
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 // 引入编程式导航 Hook。
 import { useNavigate } from "react-router-dom";
 // 引入登录接口方法。
@@ -35,10 +35,12 @@ const LoginPage = () => {
   const [captchaLoading, setCaptchaLoading] = useState(false);
   // 控制登录按钮加载状态。
   const [loginLoading, setLoginLoading] = useState(false);
+  // 记录初始化验证码是否已经请求过，避免开发严格模式下重复请求。
+  const captchaInitializedRef = useRef(false);
 
   // 把后端返回的 base64 内容转换为浏览器可渲染的图片地址。
   const formatCaptchaImage = (img: string) => {
-    return img.startsWith("data:") ? img : `data:image/gif;base64,${img}`;
+    return img.startsWith("data:") ? img : `data:image/png;base64,${img}`;
   };
 
   // 拉取并刷新图片验证码。
@@ -69,8 +71,19 @@ const LoginPage = () => {
 
   // 页面初始化时获取验证码。
   useEffect(() => {
+    if (captchaInitializedRef.current) {
+      return;
+    }
+
+    captchaInitializedRef.current = true;
     void loadCaptchaImage();
   }, [loadCaptchaImage]);
+
+  // 手动刷新验证码时同步清空旧验证码输入。
+  const handleRefreshCaptcha = () => {
+    form.setFieldValue("code", "");
+    void loadCaptchaImage();
+  };
 
   // 处理登录表单提交。
   const handleFinish = async (values: LoginFormValues) => {
@@ -163,7 +176,7 @@ const LoginPage = () => {
                 type="button"
                 title="刷新验证码"
                 aria-label="刷新验证码"
-                onClick={() => void loadCaptchaImage()}
+                onClick={handleRefreshCaptcha}
                 disabled={captchaLoading}
                 className="h-11.5 w-32 shrink-0 cursor-pointer overflow-hidden rounded-[10px] border border-[#d9d9d9] bg-white p-0 disabled:cursor-not-allowed disabled:opacity-70"
               >

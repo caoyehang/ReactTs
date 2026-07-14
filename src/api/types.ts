@@ -4,7 +4,7 @@ import type { AxiosRequestConfig, AxiosResponse } from "axios";
 // 定义通用接口响应结构。
 export interface ApiResponse<T = unknown> {
   // 后端业务状态码。
-  code: number;
+  code: number | string;
   // 后端业务提示信息。
   message?: string;
   // 兼容部分后端使用 msg 作为提示字段。

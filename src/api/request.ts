@@ -71,8 +71,12 @@ requestInstance.interceptors.response.use(
       typeof responseData === "object" &&
       "code" in responseData
     ) {
-      // 非成功状态码按业务错误处理，兼容 code 为 0 或 200 的后端。
-      if (responseData.code !== 0 && responseData.code !== 200) {
+      // 非成功状态码按业务错误处理，兼容 code 为 0、200 或 000000 的后端。
+      if (
+        responseData.code !== 0 &&
+        responseData.code !== 200 &&
+        responseData.code !== "000000"
+      ) {
         // 抛出包含原始请求配置的业务错误。
         return Promise.reject({
           message: responseData.message || responseData.msg || "请求失败",
