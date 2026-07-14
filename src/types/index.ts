@@ -12,4 +12,6 @@ export interface LoginFormValues {
   username: string;
   // 密码字段。
   password: string;
+  // 图片验证码字段。
+  code: string;
 }

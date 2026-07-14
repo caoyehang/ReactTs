@@ -1,13 +1,15 @@
 // 引入业务翻译 Hook。
 import { useAppTranslation } from "@/locales";
 // 引入登录表单所需图标。
-import { LockOutlined, UserOutlined } from "@ant-design/icons";
+import { LockOutlined, SafetyCertificateOutlined, UserOutlined } from "@ant-design/icons";
 // 引入 antd 表单、输入框、按钮和标题组件。
 import { Button, Form, Input, Typography } from "antd";
+// 引入 React 状态与生命周期 Hook。
+import { useCallback, useEffect, useState } from "react";
 // 引入编程式导航 Hook。
 import { useNavigate } from "react-router-dom";
 // 引入登录接口方法。
-import { login } from "@/api/modules/auth";
+import { getCaptchaImage, login } from "@/api/modules/auth";
 // 引入带类型的 Redux dispatch Hook。
 import { useAppDispatch } from "@/store";
 // 引入同步 token 的 action。
@@ -25,19 +27,74 @@ const LoginPage = () => {
   const dispatch = useAppDispatch();
   // 获取编程式导航函数。
   const navigate = useNavigate();
+  // 保存图片验证码内容。
+  const [captchaImage, setCaptchaImage] = useState("");
+  // 保存图片验证码唯一标识。
+  const [captchaUuid, setCaptchaUuid] = useState("");
+  // 控制验证码加载状态。
+  const [captchaLoading, setCaptchaLoading] = useState(false);
+  // 控制登录按钮加载状态。
+  const [loginLoading, setLoginLoading] = useState(false);
+
+  // 把后端返回的 base64 内容转换为浏览器可渲染的图片地址。
+  const formatCaptchaImage = (img: string) => {
+    return img.startsWith("data:") ? img : `data:image/gif;base64,${img}`;
+  };
+
+  // 拉取并刷新图片验证码。
+  const loadCaptchaImage = useCallback(async () => {
+    setCaptchaLoading(true);
+    try {
+      const captcha = await getCaptchaImage();
+      const captchaData = captcha.data ?? captcha;
+
+      if (captchaData.captchaEnabled === false) {
+        setCaptchaImage("");
+        setCaptchaUuid("");
+        return;
+      }
+
+      if (captchaData.img && captchaData.uuid) {
+        setCaptchaImage(formatCaptchaImage(captchaData.img));
+        setCaptchaUuid(captchaData.uuid);
+      }
+    } catch {
+      // 验证码接口不可用时保留手动刷新入口。
+      setCaptchaImage("");
+      setCaptchaUuid("");
+    } finally {
+      setCaptchaLoading(false);
+    }
+  }, []);
+
+  // 页面初始化时获取验证码。
+  useEffect(() => {
+    void loadCaptchaImage();
+  }, [loadCaptchaImage]);
 
   // 处理登录表单提交。
   const handleFinish = async (values: LoginFormValues) => {
-    // 调用登录接口并读取 token。
-    const { token } = await login({
-      userName: values.username,
-      password: values.password,
-    });
+    setLoginLoading(true);
+    try {
+      // 调用登录接口并读取 token。
+      const { token } = await login({
+        username: values.username,
+        password: values.password,
+        code: values.code,
+        uuid: captchaUuid,
+      });
 
-    // 将 token 同步到 Redux。
-    dispatch(syncToken(token));
-    // 登录成功后跳转首页。
-    navigate("/home");
+      // 将 token 同步到 Redux。
+      dispatch(syncToken(token));
+      // 登录成功后跳转首页。
+      navigate("/home");
+    } catch {
+      // 登录失败后刷新验证码，避免用户重复提交失效验证码。
+      form.setFieldValue("code", "");
+      void loadCaptchaImage();
+    } finally {
+      setLoginLoading(false);
+    }
   };
 
   // 渲染登录页面。
@@ -79,7 +136,7 @@ const LoginPage = () => {
           <Form.Item
             name="password"
             rules={[{ required: true, message: t("common.passwordRequired") }]}
-            className="mb-6!"
+            className="mb-4.5!"
           >
             {/* 密码输入框。 */}
             <Input.Password
@@ -89,12 +146,47 @@ const LoginPage = () => {
             />
           </Form.Item>
 
+          {/* 图片验证码表单项。 */}
+          <Form.Item
+            name="code"
+            rules={[{ required: true, message: "请输入验证码" }]}
+            className="mb-6!"
+          >
+            {/* 验证码输入框与图片。 */}
+            <div className="flex gap-3">
+              <Input
+                placeholder="验证码"
+                prefix={<SafetyCertificateOutlined className="text-[#555]!" />}
+                className="h-11.5! flex-1! rounded-[10px]! text-[18px]!"
+              />
+              <button
+                type="button"
+                title="刷新验证码"
+                aria-label="刷新验证码"
+                onClick={() => void loadCaptchaImage()}
+                disabled={captchaLoading}
+                className="h-11.5 w-32 shrink-0 cursor-pointer overflow-hidden rounded-[10px] border border-[#d9d9d9] bg-white p-0 disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {captchaImage ? (
+                  <img
+                    src={captchaImage}
+                    alt="验证码"
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <span className="text-sm text-[#555]">刷新</span>
+                )}
+              </button>
+            </div>
+          </Form.Item>
+
           {/* 提交按钮表单项。 */}
           <Form.Item className="mb-0!">
             {/* 登录提交按钮。 */}
             <Button
               type="primary"
               htmlType="submit"
+              loading={loginLoading}
               block
               className="h-12! rounded-[10px]! text-[22px]! font-medium!"
             >

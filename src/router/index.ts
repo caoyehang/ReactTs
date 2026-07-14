@@ -4,6 +4,8 @@ import { Suspense, createElement, lazy } from "react";
 import { Navigate, createBrowserRouter } from "react-router-dom";
 // 引入业务模块路由，主路由只负责聚合。
 import moduleRoutes from "./modules";
+// 引入登录态路由守卫。
+import { authGuard } from "./guard";
 
 // 定义页面懒加载期间的占位元素。
 const routeLoading = createElement("div", { className: "loading-spinner" });
@@ -32,6 +34,8 @@ const routes: IRouterType.IRouter[] = [
     id: "layout",
     // 指定布局路由的访问路径。
     path: "/",
+    // 未登录时禁止进入业务布局及其子路由。
+    loader: authGuard,
     // 提供布局路由的元信息。
     meta: {
       title: "router.root.layout",
@@ -83,6 +87,8 @@ const routes: IRouterType.IRouter[] = [
     id: "not-found",
     // 匹配所有未命中的路径。
     path: "*",
+    // 未登录时兜底路径也回到登录页，避免进入 404。
+    loader: authGuard,
     // 提供 404 页面元信息。
     meta: {
       title: "router.root.notFound",
@@ -97,7 +103,7 @@ const toRouteObject = (
   route: IRouterType.IRouter,
 ): IRouterType.AppRouteObject => {
   // 解构当前路由中参与转换的字段。
-  const { children, component, meta, name, handle, element, id, index, path } =
+  const { children, component, meta, name, handle, element, id, index, path, loader } =
     route;
   // 优先使用已提供的元素，否则根据 component 生成懒加载元素。
   const resolvedElement =
@@ -117,6 +123,8 @@ const toRouteObject = (
       element: resolvedElement,
       // 挂载当前路由的扩展信息。
       handle: resolvedHandle,
+      // 挂载当前路由的加载守卫。
+      loader,
     };
   }
 
@@ -130,6 +138,8 @@ const toRouteObject = (
     element: resolvedElement,
     // 挂载当前路由的扩展信息。
     handle: resolvedHandle,
+    // 挂载当前路由的加载守卫。
+    loader,
     // 递归转换当前路由的所有子路由。
     children: children?.length ? normalizeRoutes(children) : undefined,
   };

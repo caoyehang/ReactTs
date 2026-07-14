@@ -65,23 +65,24 @@ requestInstance.interceptors.response.use(
   (response) => {
     // 把响应体视为后端统一响应结构。
     const responseData = response.data as ApiResponse<unknown>;
-    // 判断响应是否符合统一结构。
+    // 判断响应是否包含业务状态码。
     if (
       responseData &&
       typeof responseData === "object" &&
-      "code" in responseData &&
-      "data" in responseData
+      "code" in responseData
     ) {
-      // 非 0 状态码按业务错误处理。
-      if (responseData.code !== 0) {
+      // 非成功状态码按业务错误处理，兼容 code 为 0 或 200 的后端。
+      if (responseData.code !== 0 && responseData.code !== 200) {
         // 抛出包含原始请求配置的业务错误。
         return Promise.reject({
-          message: responseData.message || "请求失败",
+          message: responseData.message || responseData.msg || "请求失败",
           config: response.config,
         });
       }
-      // 成功时只返回 data 字段，简化业务层调用。
-      return responseData.data;
+      // 成功时优先返回 data 字段；没有 data 的接口保留原响应体。
+      if ("data" in responseData) {
+        return responseData.data;
+      }
     }
     // 非统一结构时原样返回响应体。
     return response.data;
@@ -94,7 +95,10 @@ requestInstance.interceptors.response.use(
     const shouldShowError = config?.showError !== false;
     // 计算最终展示给用户的错误文案。
     const errorMessage =
-      error.response?.data?.message || error.message || "网络异常，请稍后重试";
+      error.response?.data?.message ||
+      error.response?.data?.msg ||
+      error.message ||
+      "网络异常，请稍后重试";
     // 在允许提示时展示错误消息。
     if (shouldShowError) {
       showErrorOnce(errorMessage);

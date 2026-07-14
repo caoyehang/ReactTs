@@ -4,6 +4,8 @@ declare namespace IRouterType {
   type RouteElement = import("react").ReactNode;
   // 复用 React Router 的标准 RouteObject 类型。
   type AppRouteObject = import("react-router-dom").RouteObject;
+  // 复用 React Router 的 loader 类型。
+  type RouteLoader = import("react-router-dom").LoaderFunction;
   // 定义页面组件动态导入函数类型。
   type RouteComponentImporter = () => Promise<{ default: () => JSX.Element }>;
 
@@ -43,6 +45,8 @@ declare namespace IRouterType {
     meta?: IMeta;
     // 自定义 handle 信息。
     handle?: IHandle;
+    // 路由加载守卫或数据加载函数。
+    loader?: RouteLoader;
     // 子路由列表。
     children?: IRouter[];
   }
