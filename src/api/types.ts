@@ -4,7 +4,7 @@ import type { AxiosRequestConfig, AxiosResponse } from "axios";
 // 定义通用接口响应结构。
 export interface ApiResponse<T = unknown> {
   // 后端业务状态码。
-  code: number | string;
+  code: string;
   // 后端业务提示信息。
   message?: string;
   // 兼容部分后端使用 msg 作为提示字段。
@@ -46,15 +46,8 @@ export interface LoginParams {
   uuid: string;
 }
 
-// 定义登录接口返回的数据结构。
-export interface LoginData {
-  // 登录成功后的令牌。
-  token: string;
-  // 当前登录用户 ID。
-  userId?: string;
-  // 当前登录用户名。
-  username?: string;
-}
+// 定义登录接口返回的数据结构，成功时 data 直接为 token 字符串。
+export type LoginData = string;
 
 // 定义图片验证码接口返回的数据结构。
 export interface CaptchaImageData {

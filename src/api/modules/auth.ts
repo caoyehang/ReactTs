@@ -5,8 +5,10 @@ import { request } from "../request";
 
 // 定义登录接口方法。
 export const login = (data: LoginParams) => {
-  // 发送登录 POST 请求并返回 data 字段。
-  return request.post<LoginData, LoginParams>("/user/login", data);
+  // 发送登录 GET 请求，并通过查询参数传递登录字段。
+  return request.get<LoginData>("/user/login", {
+    params: data,
+  });
 };
 
 // 定义图片验证码接口方法。

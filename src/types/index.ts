@@ -14,4 +14,6 @@ export interface LoginFormValues {
   password: string;
   // 图片验证码字段。
   code: string;
+  // 图片验证码唯一标识。
+  uuid: string;
 }

@@ -2,8 +2,8 @@
 import { useAppTranslation } from "@/locales";
 // 引入登录表单所需图标。
 import { LockOutlined, SafetyCertificateOutlined, UserOutlined } from "@ant-design/icons";
-// 引入 antd 表单、输入框、按钮和标题组件。
-import { Button, Form, Input, Typography } from "antd";
+// 引入 antd 表单、输入框、按钮、消息提示和标题组件。
+import { Button, Form, Input, message, Typography } from "antd";
 // 引入 React 状态与生命周期 Hook。
 import { useCallback, useEffect, useRef, useState } from "react";
 // 引入编程式导航 Hook。
@@ -21,20 +21,23 @@ import type { LoginFormValues } from "@/types";
 const LoginPage = () => {
   // 获取翻译函数。
   const { t } = useAppTranslation();
-  // 创建 antd 表单实例。
-  const [form] = Form.useForm<LoginFormValues>();
   // 获取 Redux dispatch。
   const dispatch = useAppDispatch();
   // 获取编程式导航函数。
   const navigate = useNavigate();
   // 保存图片验证码内容。
   const [captchaImage, setCaptchaImage] = useState("");
-  // 保存图片验证码唯一标识。
-  const [captchaUuid, setCaptchaUuid] = useState("");
   // 控制验证码加载状态。
   const [captchaLoading, setCaptchaLoading] = useState(false);
   // 控制登录按钮加载状态。
   const [loginLoading, setLoginLoading] = useState(false);
+  // 保存登录表单输入内容。
+  const [userInfo, setUserInfo] = useState<LoginFormValues>({
+    username: "",
+    password: "",
+    code: "",
+    uuid: "",
+  });
   // 记录初始化验证码是否已经请求过，避免开发严格模式下重复请求。
   const captchaInitializedRef = useRef(false);
 
@@ -52,18 +55,27 @@ const LoginPage = () => {
 
       if (captchaData.captchaEnabled === false) {
         setCaptchaImage("");
-        setCaptchaUuid("");
+        setUserInfo((prevUserInfo) => ({
+          ...prevUserInfo,
+          uuid: "",
+        }));
         return;
       }
 
       if (captchaData.img && captchaData.uuid) {
         setCaptchaImage(formatCaptchaImage(captchaData.img));
-        setCaptchaUuid(captchaData.uuid);
+        setUserInfo((prevUserInfo) => ({
+          ...prevUserInfo,
+          uuid: captchaData.uuid,
+        }));
       }
     } catch {
       // 验证码接口不可用时保留手动刷新入口。
       setCaptchaImage("");
-      setCaptchaUuid("");
+      setUserInfo((prevUserInfo) => ({
+        ...prevUserInfo,
+        uuid: "",
+      }));
     } finally {
       setCaptchaLoading(false);
     }
@@ -81,20 +93,47 @@ const LoginPage = () => {
 
   // 手动刷新验证码时同步清空旧验证码输入。
   const handleRefreshCaptcha = () => {
-    form.setFieldValue("code", "");
+    setUserInfo((prevUserInfo) => ({
+      ...prevUserInfo,
+      code: "",
+      uuid: "",
+    }));
     void loadCaptchaImage();
   };
 
+  // 更新登录表单字段。
+  const handleUserInfoChange = (field: keyof LoginFormValues, value: string) => {
+    setUserInfo((prevUserInfo) => ({
+      ...prevUserInfo,
+      [field]: value,
+    }));
+  };
+
   // 处理登录表单提交。
-  const handleFinish = async (values: LoginFormValues) => {
+  const handleFinish = async () => {
+    if (!userInfo.username) {
+      void message.warning(t("common.usernameRequired"));
+      return;
+    }
+
+    if (!userInfo.password) {
+      void message.warning(t("common.passwordRequired"));
+      return;
+    }
+
+    if (!userInfo.code) {
+      void message.warning("请输入验证码");
+      return;
+    }
+
     setLoginLoading(true);
     try {
       // 调用登录接口并读取 token。
-      const { token } = await login({
-        username: values.username,
-        password: values.password,
-        code: values.code,
-        uuid: captchaUuid,
+      const token = await login({
+        username: userInfo.username,
+        password: userInfo.password,
+        code: userInfo.code,
+        uuid: userInfo.uuid,
       });
 
       // 将 token 同步到 Redux。
@@ -103,7 +142,11 @@ const LoginPage = () => {
       navigate("/home");
     } catch {
       // 登录失败后刷新验证码，避免用户重复提交失效验证码。
-      form.setFieldValue("code", "");
+      setUserInfo((prevUserInfo) => ({
+        ...prevUserInfo,
+        code: "",
+        uuid: "",
+      }));
       void loadCaptchaImage();
     } finally {
       setLoginLoading(false);
@@ -125,20 +168,19 @@ const LoginPage = () => {
         </Typography.Title>
 
         {/* 登录表单。 */}
-        <Form<LoginFormValues>
-          form={form}
+        <Form
           onFinish={handleFinish}
           autoComplete="off"
           size="large"
         >
           {/* 用户名表单项。 */}
           <Form.Item
-            name="username"
-            rules={[{ required: true, message: t("common.usernameRequired") }]}
             className="mb-4.5!"
           >
             {/* 用户名输入框。 */}
             <Input
+              value={userInfo.username}
+              onChange={(event) => handleUserInfoChange("username", event.target.value)}
               placeholder={t("common.username")}
               prefix={<UserOutlined className="text-[#555]!" />}
               className="h-11.5! rounded-[10px]! text-[18px]!"
@@ -147,12 +189,12 @@ const LoginPage = () => {
 
           {/* 密码表单项。 */}
           <Form.Item
-            name="password"
-            rules={[{ required: true, message: t("common.passwordRequired") }]}
             className="mb-4.5!"
           >
             {/* 密码输入框。 */}
             <Input.Password
+              value={userInfo.password}
+              onChange={(event) => handleUserInfoChange("password", event.target.value)}
               placeholder={t("common.password")}
               prefix={<LockOutlined className="text-[#555]!" />}
               className="h-11.5! rounded-[10px]! text-[18px]!"
@@ -161,13 +203,13 @@ const LoginPage = () => {
 
           {/* 图片验证码表单项。 */}
           <Form.Item
-            name="code"
-            rules={[{ required: true, message: "请输入验证码" }]}
             className="mb-6!"
           >
             {/* 验证码输入框与图片。 */}
             <div className="flex gap-3">
               <Input
+                value={userInfo.code}
+                onChange={(event) => handleUserInfoChange("code", event.target.value)}
                 placeholder="验证码"
                 prefix={<SafetyCertificateOutlined className="text-[#555]!" />}
                 className="h-11.5! flex-1! rounded-[10px]! text-[18px]!"

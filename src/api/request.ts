@@ -15,8 +15,26 @@ const requestInstance = axios.create({
   timeout: 10000,
 });
 
+// 后端约定 000000 为请求成功。
+const SUCCESS_CODE = "000000";
+
 // 记录当前是否已有错误提示在展示。
 let errorMessageVisible = false;
+
+// 判断后端业务状态码是否表示成功。
+const isSuccessCode = (code: unknown) => {
+  return String(code) === SUCCESS_CODE;
+};
+
+// 读取后端错误提示，兼容 message 与 msg 字段。
+const getResponseMessage = (responseData?: ApiResponse<unknown>) => {
+  return responseData?.message || responseData?.msg;
+};
+
+// 根据请求配置决定是否展示错误提示。
+const shouldShowRequestError = (config?: RequestConfig) => {
+  return config?.showError !== false;
+};
 
 // 展示去重后的错误消息。
 const showErrorOnce = (content: string) => {
@@ -71,15 +89,22 @@ requestInstance.interceptors.response.use(
       typeof responseData === "object" &&
       "code" in responseData
     ) {
-      // 非成功状态码按业务错误处理，兼容 code 为 0、200 或 000000 的后端。
-      if (
-        responseData.code !== 0 &&
-        responseData.code !== 200 &&
-        responseData.code !== "000000"
-      ) {
+      // 非 000000 状态码按业务错误处理。
+      if (!isSuccessCode(responseData.code)) {
+        // 计算业务错误文案。
+        const errorMessage = getResponseMessage(responseData) || "请求失败";
+        // 读取当前请求配置。
+        const config = response.config as RequestConfig | undefined;
+
+        // 在允许提示时展示错误消息。
+        if (shouldShowRequestError(config)) {
+          showErrorOnce(errorMessage);
+        }
+
         // 抛出包含原始请求配置的业务错误。
         return Promise.reject({
-          message: responseData.message || responseData.msg || "请求失败",
+          message: errorMessage,
+          code: responseData.code,
           config: response.config,
         });
       }
@@ -96,13 +121,10 @@ requestInstance.interceptors.response.use(
     // 读取当前请求配置。
     const config = error.config as RequestConfig | undefined;
     // 判断当前请求是否允许展示错误提示。
-    const shouldShowError = config?.showError !== false;
+    const shouldShowError = shouldShowRequestError(config);
     // 计算最终展示给用户的错误文案。
     const errorMessage =
-      error.response?.data?.message ||
-      error.response?.data?.msg ||
-      error.message ||
-      "网络异常，请稍后重试";
+      getResponseMessage(error.response?.data) || error.message || "网络异常，请稍后重试";
     // 在允许提示时展示错误消息。
     if (shouldShowError) {
       showErrorOnce(errorMessage);
